@@ -1,0 +1,26 @@
+{
+  "users": [
+    {
+      "name": "Elliot",
+      "type": "Reader",
+      "age": 23,
+      "children" : ["Sally,Ann", "BruceD\"Argo"],
+      "social": {
+        "facebook": "@Elliot9",
+        "twitter": "@Elliot10"
+      },
+      "dates" : ["1998", "2022"]
+    },
+    {
+      "name": "Fraser",
+      "type": "Author",
+      "age": 17,
+      "social": {
+        "facebook": "@Fraser19",
+        "twitter": "@Fraser28"
+      },
+      "dates" : ["1779", "1802", "1804"],
+      "football team": "Collingwood"
+    }
+  ]
+}
