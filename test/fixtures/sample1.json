@@ -1,0 +1,16 @@
+{
+    "cast": [
+
+	{
+	    "episodes": [1, 2],
+	    "name": "Veraone",
+	    "union": true
+	},
+	{
+	    "episodes": [3, 4],
+	    "name": "Kyle",
+	    "union": false,
+	    "salary": 120000
+	}
+    ]
+}

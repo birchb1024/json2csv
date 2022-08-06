@@ -1,0 +1,40 @@
+[
+  {
+    "borders": "",
+    "calling_code": "61",
+    "capital": "Canberra",
+    "city": "North Gosford",
+    "connection": {
+      "asn": 133612,
+      "domain": "vodafone.com.au",
+      "isp": "Vodafone Australia Pty Ltd",
+      "org": "VODAFONE AUSTRALIA PTY LIMITED"
+    },
+    "continent": "Oceania",
+    "continent_code": "OC",
+    "country": "Australia",
+    "country_code": "AU",
+    "flag": {
+      "emoji": "ud83cudde6ud83cuddfa",
+      "emoji_unicode": "U+1F1E6 U+1F1FA",
+      "img": "https://cdn.ipwhois.io/flags/au.svg"
+    },
+    "ip": "120.17.69.106",
+    "is_eu": false,
+    "latitude": -33.415,
+    "longitude": 151.351,
+    "postal": "2250",
+    "region": "New South Wales",
+    "region_code": "NSW",
+    "success": true,
+    "timezone": {
+      "abbr": "AEST",
+      "current_time": "2022-08-03T17:16:52+10:00",
+      "id": "Australia/Sydney",
+      "is_dst": false,
+      "offset": 36000,
+      "utc": "+10:00"
+    },
+    "type": "IPv4"
+  }
+]
