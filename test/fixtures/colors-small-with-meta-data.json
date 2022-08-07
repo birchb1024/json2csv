@@ -1,0 +1,22 @@
+{
+  "colours": [
+    {
+      "blue": 255,
+      "green": 248,
+      "name": "aliceblue",
+      "red": 240
+    },
+    {
+      "blue": 215,
+      "green": 235,
+      "name": "antiquewhite",
+      "red": 250
+    },
+    {
+      "blue": 255,
+      "green": 255,
+      "name": "aqua",
+      "red": 0
+    }
+  ]
+}

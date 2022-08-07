@@ -11,102 +11,108 @@ import (
 	"strings"
 )
 
-var loops = map[string]int{}
-var counters = map[string]int{}
-var row = map[string]string{}
+type Json2csv struct {
+	nameSep  string
+	listChar string
 
-var nameSep string = "."
-var listChar string = "$"
+	loops        map[string]int
+	counters     map[string]int
+	row          map[string]string
+	columnNames  []string
+	counterNames []string
+}
 
+func (jc *Json2csv) errorExit(err error) {
+	_, _ = fmt.Fprintf(os.Stderr, "error: %v\n", err)
+	_, _ = fmt.Fprintln(os.Stderr, jc)
+	panic(err)
+}
 func main() {
-	var jsonTree interface{}
+	j2c := NewJson2CSV(".", "$")
 	var jtree interface{}
 
 	jsonFile := os.Stdin
-	defer jsonFile.Close()
+	defer func() { _ = jsonFile.Close() }()
 	csvw := csv.NewWriter(os.Stdout)
 
 	byteValue, err := ioutil.ReadAll(jsonFile)
 	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+		j2c.errorExit(err)
 	}
-	err = json.Unmarshal(byteValue, &jsonTree)
+	err = json.Unmarshal(byteValue, &jtree)
 	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+		j2c.errorExit(err)
 	}
 
-	jtree = jsonTree
-	headers := findHeaders([]string{}, jtree)
-
-	columnNames := []string{}
-	for k := range headers {
-		columnNames = append(columnNames, k)
+	jtree = jtree
+	headers := findHeaders(j2c.nameSep, j2c.listChar, []string{}, jtree)
+	j2c.setColumnNames(headers)
+	err = csvw.Write(j2c.columnNames)
+	if err != nil {
+		j2c.errorExit(err)
 	}
-	sort.Strings(columnNames)
-	csvw.Write(columnNames)
-	findCounters([]string{}, jtree)
-	counterNames := []string{}
-	for k := range loops {
-		counterNames = append(counterNames, k)
-	}
-	sort.Strings(counterNames)
-	resetCounters(counterNames)
+	j2c.findCounters([]string{}, jtree)
+	j2c.resetCounters(j2c.counterNames)
 	for {
-		//for _, n := range counterNames {
-		//	fmt.Print(n, "=", counters[n], " ")
-		//}
-		//fmt.Println()
-		resetRow()
-		populateRow([]string{}, jtree)
-		var record []string
-		for _, colName := range columnNames {
-			record = append(record, row[colName])
+		j2c.resetRow()
+		skips := j2c.populateRow([]string{}, jtree)
+		if skips == 0 {
+			record := j2c.getRecordFromRow()
+			err := csvw.Write(record)
+			if err != nil {
+				j2c.errorExit(err)
+			}
+			csvw.Flush()
 		}
-		err := csvw.Write(record)
-		if err != nil {
-			fmt.Println(err)
-			os.Exit(0)
-		}
-		csvw.Flush()
-		if incrementCounters(counterNames) == true {
+		if j2c.incrementCounters(j2c.counterNames) == true {
 			return
 		}
 	}
 
 }
 
-func resetRow() {
-	for k := range row {
-		row[k] = ""
+func NewJson2CSV(ns string, lc string) *Json2csv {
+	jc := Json2csv{
+		nameSep:      ns,
+		listChar:     lc,
+		loops:        map[string]int{},
+		counters:     map[string]int{},
+		row:          map[string]string{},
+		columnNames:  []string{},
+		counterNames: []string{},
+	}
+	return &jc
+}
+func (jc *Json2csv) resetRow() {
+	for k := range jc.row {
+		jc.row[k] = ""
 	}
 }
-func resetCounters(names []string) {
+func (jc *Json2csv) resetCounters(names []string) {
 	for _, n := range names {
-		counters[n] = 1
+		jc.counters[n] = 1
 	}
 }
 
-func incrementCounters(names []string) bool {
+func (jc *Json2csv) incrementCounters(names []string) bool {
 	if len(names) == 0 {
 		return true
 	}
-	carry := incrementCounters(names[1:])
+	carry := jc.incrementCounters(names[1:])
 	if carry == false {
 		return false
 	}
-	count := counters[names[0]]
+	count := jc.counters[names[0]]
 	count += 1
-	if count > loops[names[0]] {
+	if count > jc.loops[names[0]] {
 		return true
 	}
-	counters[names[0]] = count
-	resetCounters(names[1:])
+	jc.counters[names[0]] = count
+	jc.resetCounters(names[1:])
 	return false
 }
 
-func findHeaders(path []string, jtree interface{}) map[string]bool {
+func findHeaders(nameSep string, listChar string, path []string, jtree interface{}) map[string]bool {
 	pathString := strings.Join(path, nameSep)
 	headers := map[string]bool{}
 	switch x := jtree.(type) {
@@ -115,7 +121,7 @@ func findHeaders(path []string, jtree interface{}) map[string]bool {
 		npath := strings.Join(np, nameSep)
 		headers[npath] = true
 		for _, subtree := range x {
-			subHeaders := findHeaders(np, subtree)
+			subHeaders := findHeaders(nameSep, listChar, np, subtree)
 			for k, i := range subHeaders {
 				headers[k] = i
 			}
@@ -124,7 +130,7 @@ func findHeaders(path []string, jtree interface{}) map[string]bool {
 		keyNumber := 0
 		for k, subtree := range x {
 			keyNumber += 1
-			subHeaders := findHeaders(append(path, k), subtree)
+			subHeaders := findHeaders(nameSep, listChar, append(path, k), subtree)
 			for k := range subHeaders {
 				headers[k] = true
 			}
@@ -134,46 +140,74 @@ func findHeaders(path []string, jtree interface{}) map[string]bool {
 	}
 	return headers
 }
-func findCounters(path []string, jtree interface{}) {
+func (jc *Json2csv) findCounters(path []string, jtree interface{}) {
 	switch x := jtree.(type) {
 	case []interface{}:
-		np := append(path, listChar)
-		npath := strings.Join(np, nameSep)
-		m, ok := loops[npath]
+		np := append(path, jc.listChar)
+		npath := strings.Join(np, jc.nameSep)
+		m, ok := jc.loops[npath]
 		if !ok {
-			loops[npath] = len(x)
+			jc.loops[npath] = len(x)
 		}
 		if ok && m < len(x) {
-			loops[npath] = len(x)
+			jc.loops[npath] = len(x)
 		}
 		for _, subtree := range x {
-			findCounters(np, subtree)
+			jc.findCounters(np, subtree)
 		}
 	case map[string]interface{}:
 		for k, subtree := range x {
-			findCounters(append(path, k), subtree)
+			jc.findCounters(append(path, k), subtree)
 		}
 	default:
 
+	}
+	if len(path) == 0 {
+		jc.counterNames = []string{}
+		for k := range jc.loops {
+			jc.counterNames = append(jc.counterNames, k)
+		}
+		sort.Strings(jc.counterNames)
 	}
 }
 
-func populateRow(path []string, jtree interface{}) {
-	pathString := strings.Join(path, nameSep)
+func (jc *Json2csv) populateRow(path []string, jtree interface{}) int {
+	skipCount := 0
+	pathString := strings.Join(path, jc.nameSep)
 	switch x := jtree.(type) {
 	case []interface{}:
-		np := append(path, listChar)
-		npath := strings.Join(np, nameSep)
-		index := counters[npath]
-		row[npath] = strconv.Itoa(index)
-		if len(x) >= index {
-			populateRow(np, x[index-1])
+		np := append(path, jc.listChar)
+		npath := strings.Join(np, jc.nameSep)
+		index := jc.counters[npath]
+		jc.row[npath] = strconv.Itoa(index)
+		if len(x) < index {
+			jc.populateRow(np, "")
+			return skipCount + 1
 		}
+		skipCount += jc.populateRow(np, x[index-1])
 	case map[string]interface{}:
 		for k, subtree := range x {
-			populateRow(append(path, k), subtree)
+			skipCount += jc.populateRow(append(path, k), subtree)
 		}
 	default:
-		row[pathString] = fmt.Sprintf("%v", jtree)
+		jc.row[pathString] = fmt.Sprintf("%v", jtree)
 	}
+	return skipCount
+}
+
+func (jc *Json2csv) setColumnNames(headers map[string]bool) {
+	jc.columnNames = []string{}
+	for k := range headers {
+		jc.columnNames = append(jc.columnNames, k)
+	}
+	sort.Strings(jc.columnNames)
+
+}
+
+func (jc *Json2csv) getRecordFromRow() []string {
+	var record []string
+	for _, colName := range jc.columnNames {
+		record = append(record, jc.row[colName])
+	}
+	return record
 }

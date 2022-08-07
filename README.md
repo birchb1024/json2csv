@@ -38,11 +38,11 @@ $,$.Title,$.cast.$,$.date.month,$.date.year
 1,The Life of Brian,Terrance Trent Darby,January,1908
 ```
 
-# Notes
+# Other Formats
 
 To convert any arbitrary JSON file into useful CSV is a hard problem. Because the infinite
 variety of formats possible make it hard to perform the right transformations. Forms which 
-store data in map keys are hard, for example: 
+store data in map keys are hard. For example json2csv given this: 
 
 ```
 {
@@ -52,4 +52,24 @@ store data in map keys are hard, for example:
   "aquamarine": [127, 255, 212, 1],
 . . .
 ```
-
+generates something we cannot use:
+```
+aliceblue.$,antiquewhite.$,aqua.$, . . .
+240,250,0
+240,250,255
+240,250,255
+240,250,1
+```
+With tools like 'jp', convert the input to a conventional form with the required
+meta-data (field names):
+```
+{
+  "colours": [
+    {
+      "blue": 255,
+      "green": 248,
+      "name": "aliceblue",
+      "red": 240
+    },
+. . .
+```
