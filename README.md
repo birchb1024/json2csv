@@ -14,7 +14,7 @@ $ json2csv <inputfile >outputfile
 
 `json2csv` works for JSON files which are already organized into simple record structures.
 
-```
+```JSON
 [
   { "Title": "The Life of Brian",
     "date": { "year": "1908", "month": "January"},
@@ -44,7 +44,7 @@ To convert any arbitrary JSON file into useful CSV is a hard problem. Because th
 variety of formats possible make it hard to perform the right transformations. Forms which 
 store data in map keys are hard. For example json2csv given this: 
 
-```
+```JSON
 {
   "aliceblue": [240, 248, 255, 1],
   "antiquewhite": [250, 235, 215, 1],
@@ -62,7 +62,7 @@ aliceblue.$,antiquewhite.$,aqua.$, . . .
 ```
 With tools like 'jp', convert the input to a conventional form with the required
 meta-data (field names):
-```
+```JSON
 {
   "colours": [
     {
