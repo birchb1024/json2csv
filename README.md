@@ -22,7 +22,7 @@ $ json2csv <inputfile >outputfile
 	    "Joanna Lumley",
 		"Terrance Trent Darby"
 		]
-	"
+	
 },
  etc ...
 ]
