@@ -35,7 +35,7 @@ column name internal separator. (default ".")
   },
   { "Title": "The Life of Pi",
     "date": { "year": "2012", "month": "January"},
-    "cast" : ["Suraj Sharma", "Nota Tiger ]
+    "cast" : ["Suraj Sharma", "Nota Tiger" ]
   }
 ]
 ```
