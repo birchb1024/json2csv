@@ -9,6 +9,19 @@ Convert JSON data to CSV data easily
 ```
 $ json2csv <inputfile >outputfile
 ```
+Usage of json2csv:
+
+`-dedupe`
+Remove duplicate rows. Usage: -dedupe=false (default true)
+
+`-index` string
+List index column name part. (default "#")
+
+`-list` string
+List column name part. (default "LIST")
+
+`-separator` string
+column name internal separator. (default ".")
 
 # Description
 
@@ -18,13 +31,12 @@ $ json2csv <inputfile >outputfile
 [
   { "Title": "The Life of Brian",
     "date": { "year": "1908", "month": "January"},
-	"cast" : [
-	    "Joanna Lumley",
-		"Terrance Trent Darby"
-		]
-	
-},
- etc ...
+    "cast" : [ "Joanna Lumley", "Terrance Trent Darby" ]
+  },
+  { "Title": "The Life of Pi",
+    "date": { "year": "2012", "month": "January"},
+    "cast" : ["Suraj Sharma", "Nota Tiger ]
+  }
 ]
 ```
 
@@ -33,10 +45,31 @@ mapped to cells. Nested maps result in compound column names. Embedded lists hav
 row per each item in the list. The above is output as:
 
 ```
-$,$.Title,$.cast.$,$.date.month,$.date.year
-1,The Life of Brian,Joanna Lumley,January,1908
-1,The Life of Brian,Terrance Trent Darby,January,1908
+LIST,LIST.#,LIST.Title,LIST.date.year,LIST.cast.LIST,LIST.date.month,LIST.cast.LIST.#
+,1,The Life of Brian,1908,Joanna Lumley,January,1
+,1,The Life of Brian,1908,Terrance Trent Darby,January,2
+,2,The Life of Pi,2012,Suraj Sharma,January,1
+,2,The Life of Pi,2012,Nota Tiger,January,2
 ```
+
+# Column names
+
+The column names format can be altered to avoid issues by using the command-line options. 
+Example:
+```
+$ ./json2csv -list 'items' -index number -separator '_' <test/fixtures/movies.json
+items,items_number,items_Title,items_date_year,items_cast_items,items_date_month,items_cast_items_number
+,1,The Life of Brian,1908,Joanna Lumley,January,1
+,2,The Life of Pi,2012,Suraj Sharma,January,1
+,1,The Life of Brian,1908,Terrance Trent Darby,January,2
+,2,The Life of Pi,2012,Nota Tiger,January,2
+```
+
+# Duplicate rows
+
+The program would generate duplicate rows if a subtree lacks lists which other subtrees have. 
+By default it remembers all rows previously output and skips duplicates. This may consume 
+too much memory with very large input files, in which case the option `-dedupe=false` is available/
 
 # Other Formats
 
@@ -54,7 +87,7 @@ store data in map keys are hard. For example json2csv given this:
 ```
 generates something we cannot use:
 ```
-aliceblue.$,antiquewhite.$,aqua.$, . . .
+aliceblue.LIST,antiquewhite.LIST,aqua.LIST, . . .
 240,250,0
 240,250,255
 240,250,255
