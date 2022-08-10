@@ -37,11 +37,15 @@ var listIndexColumn = "#"
 func main() {
 
 	var jtree interface{}
-	flag.BoolVar(&removeDuplicateRows, "no-dedupe", true, "Do not remove duplicate rows.")
-	flag.StringVar(&columnNameSeparator, "separator", ".", "column name internal separator. (default '.'")
-	flag.StringVar(&listColumnName, "list", "LIST", "List column name part. (default LIST)")
-	flag.StringVar(&listIndexColumn, "index", "#", "List index column name part. (default #)")
+	flag.BoolVar(&removeDuplicateRows, "dedupe", true, "Remove duplicate rows. Usage: -dedupe=false")
+	flag.StringVar(&columnNameSeparator, "separator", ".", "column name internal separator.")
+	flag.StringVar(&listColumnName, "list", "LIST", "List column name part.")
+	flag.StringVar(&listIndexColumn, "index", "#", "List index column name part.")
 	flag.Parse()
+	if len(flag.Args()) > 0 {
+		flag.PrintDefaults()
+		os.Exit(1)
+	}
 
 	j2c := NewJson2CSV(columnNameSeparator, listColumnName, listIndexColumn)
 
