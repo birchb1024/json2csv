@@ -30,14 +30,20 @@ func (jc *Json2csv) errorExit(err error) {
 }
 
 var removeDuplicateRows = true
+var columnNameSeparator = "#"
+var listColumnName = "LIST"
+var listIndexColumn = "#"
 
 func main() {
 
 	var jtree interface{}
 	flag.BoolVar(&removeDuplicateRows, "no-dedupe", true, "Do not remove duplicate rows.")
+	flag.StringVar(&columnNameSeparator, "separator", ".", "column name internal separator. (default '.'")
+	flag.StringVar(&listColumnName, "list", "LIST", "List column name part. (default LIST)")
+	flag.StringVar(&listIndexColumn, "index", "#", "List index column name part. (default #)")
 	flag.Parse()
 
-	j2c := NewJson2CSV(".", "LIST", "#")
+	j2c := NewJson2CSV(columnNameSeparator, listColumnName, listIndexColumn)
 
 	jsonFile := os.Stdin
 	defer func() { _ = jsonFile.Close() }()
