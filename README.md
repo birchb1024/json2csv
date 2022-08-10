@@ -52,6 +52,15 @@ LIST,LIST.#,LIST.Title,LIST.date.year,LIST.cast.LIST,LIST.date.month,LIST.cast.L
 ,2,The Life of Pi,2012,Nota Tiger,January,2
 ```
 
+Here's the pretty version:
+
+|LIST|LIST.#|LIST.Title       |LIST.date.year|LIST.cast.LIST      |LIST.date.month|LIST.cast.LIST.#|
+|----|------|-----------------|--------------|--------------------|---------------|----------------|
+|    |1     |The Life of Brian|1908          |Joanna Lumley       |January        |1               |
+|    |1     |The Life of Brian|1908          |Terrance Trent Darby|January        |2               |
+|    |2     |The Life of Pi   |2012          |Suraj Sharma        |January        |1               |
+|    |2     |The Life of Pi   |2012          |Nota Tiger          |January        |2               |
+
 # Column names
 
 The column names format can be altered to avoid issues by using the command-line options. 
