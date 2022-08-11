@@ -241,7 +241,7 @@ func (jc *Json2csv) setColumnNames(headers map[string]bool) {
 	}
 	valueFn := func(i int) int {
 		n := jc.columnNames[i]
-		return 100*(strings.Count(n, jc.nameSep)-strings.Count(n, jc.listIndex)) + len(n)
+		return 1000*strings.Count(n, jc.nameSep) + 100*strings.Count(n, jc.listIndex) + len(n)
 	}
 	sort.Slice(jc.columnNames, func(i, j int) bool {
 		return valueFn(i) < valueFn(j)
