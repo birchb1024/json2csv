@@ -115,3 +115,26 @@ meta-data (field names):
     },
 . . .
 ```
+
+# Using SQL to query the CSV
+
+json2csv denormalizes the JSON - you can query the output table with SQL, here I use `duckdb`
+
+Example IP Addresses JSON
+Query on any key in the JSON:
+```
+$ <test/fixtures/ip-addresses-style1.json ./json2csv -separator _ > foo.csv
+$ duckdb -cmd '.mode box' -c "SELECT LIST_ip, LIST_country, LIST_city, LIST_connection_asn FROM read_csv('foo.csv') WHERE LIST_connection_isp = 'ITonCloud';"              
+┌──────────────┬──────────────┬───────────┬─────────────────────┐
+│   LIST_ip    │ LIST_country │ LIST_city │ LIST_connection_asn │
+├──────────────┼──────────────┼───────────┼─────────────────────┤
+│ 103.215.20.6 │ Australia    │ Sydney    │ 132015              │
+└──────────────┴──────────────┴───────────┴─────────────────────┘
+```
+
+If the CSV file is large, save space with Parquet file, convert with duckdb and the query the parquet file:
+
+```
+$ duckdb -c "COPY (SELECT * FROM 'foo.csv') TO 'foo.parquet' (FORMAT PARQUET);"`
+$ duckdb -cmd '.mode box' -c "SELECT LIST_ip, LIST_country, LIST_city, LIST_connection_asn FROM read_parquet('foo.parquet') WHERE LIST_connection_isp = 'ITonCloud';"
+```
