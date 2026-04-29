@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"os"
 	"sort"
 	"strconv"
@@ -33,6 +33,7 @@ var removeDuplicateRows = true
 var columnNameSeparator = "#"
 var listColumnName = "LIST"
 var listIndexColumn = "#"
+var fieldSep = ","
 
 func main() {
 
@@ -41,6 +42,7 @@ func main() {
 	flag.StringVar(&columnNameSeparator, "separator", ".", "column name internal separator.")
 	flag.StringVar(&listColumnName, "list", "LIST", "List column name part.")
 	flag.StringVar(&listIndexColumn, "index", "#", "List index column name part.")
+	flag.StringVar(&fieldSep, "FS", ",", "Field separator")
 	flag.Parse()
 	if len(flag.Args()) > 0 {
 		flag.PrintDefaults()
@@ -52,8 +54,9 @@ func main() {
 	jsonFile := os.Stdin
 	defer func() { _ = jsonFile.Close() }()
 	csvw := csv.NewWriter(os.Stdout)
+	csvw.Comma = rune(fieldSep[0])
 
-	byteValue, err := ioutil.ReadAll(jsonFile)
+	byteValue, err := io.ReadAll(jsonFile)
 	if err != nil {
 		j2c.errorExit(err)
 	}
@@ -105,7 +108,7 @@ func rowDuplicated(record []string) bool {
 	return false
 }
 
-func NewJson2CSV(ns string, lc string, li string) *Json2csv {
+func NewJson2CSV(ns, lc, li string) *Json2csv {
 	jc := Json2csv{
 		nameSep:      ns,
 		listChar:     lc,

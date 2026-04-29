@@ -1,3 +1,3 @@
 module github.com/birchb1024/json2csv
 
-go 1.18
+go 1.25.6
